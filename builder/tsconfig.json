@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "target": "es5",
+      "module": "commonjs",
+      "strict": true,
+      "skipLibCheck": true,
+      //"outDir": "./builder"
+    },
+    "exclude": [
+      "node_modules"
+    ],
+    "include": [
+      "./builder.ts",
+    ]
+  }
+  
