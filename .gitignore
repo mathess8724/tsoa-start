@@ -1,4 +1,7 @@
 node_modules/
 src/**/*.js
 builder/**/*.js
+builder/**/*.js.map
+dist/**/*.js
+dist/**/*.js.map
 build/*
