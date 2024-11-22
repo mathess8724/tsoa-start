@@ -11,8 +11,15 @@ const createDirectory = (name: string) => {
     }
     const capitalName = capitalizeFirstLetter(name);
     const files = ['.ts', 'Controller.ts', 'Service.ts'];
-    const interfaceContent = `export interface ${capitalizeFirstLetter(name)} {\n url: string;\n}`;
-    const controllerContent = `import {
+    const interfaceContent = `
+    export interface ${capitalizeFirstLetter(name)}Response {
+    token: string;
+    expiresIn: number;
+   }
+    `;
+
+    const controllerContent2 = `
+    import {
         Body,
         Controller,
         Get,
@@ -22,51 +29,63 @@ const createDirectory = (name: string) => {
         Route,
         SuccessResponse,
       } from "tsoa";
-      import { ${capitalName} } from "./${name}";
-      import { ${capitalName}Service, ${capitalName}Params } from "./${name}Service";
+    import { ServiceResult } from "../utils/interfaces/ServiceResult";
+    import { ${capitalName}Response } from "./interfaces";  
+    import { ${capitalName}Service, } from "./${name}Service"; 
       
       @Route("${name}")
-      export class ${capitalName}Controller extends Controller {
+      export class ${capitalName}ontroller extends Controller {
         @Get("{userId}")
         public async getUser(
           @Path() userId: number,
           @Query() name?: string
-        ): Promise<${capitalName}> {
-          return new ${capitalName}Service().get(userId, name);
+        ): Promise<ServiceResult<${capitalName}Response>> {
+          const resp =  new ${capitalName}Service().get(userId, name);
+          return resp
         }
       
         @SuccessResponse("201", "Created") // Custom success response
         @Post()
         public async create${capitalName}(
-          @Body() requestBody: ${capitalName}Params
-        ): Promise<void> {
+          @Body() requestBody: {test: string}
+        ): Promise<ServiceResult<${capitalName}Response>> {
           this.setStatus(201); // set return status 201
-          new ${capitalName}Service().create(requestBody);
-          return;
+          const resp = new ${capitalName}Service().create(requestBody);
+          return resp;
         }
-      }`;
-    const serviceContent = `import { ${capitalName} } from "./${name}";
+      }
+    `
+    const serviceContent2 = `
+    import { prepareError, prepareSuccess, ServiceResult } from "../utils"
+    import { ${capitalName}Response } from "./interfaces"
 
-    // A post request should not contain an id.
-    export type ${capitalName}Params = Pick<${capitalName}, "url">;
     
     export class ${capitalName}Service {
-      public get(id: number, name?: string): ${capitalName} {
-        return {
-          url: "url string"
-        };
+      public get(id: number, name?: string): Promise<ServiceResult<${capitalName}Response>> {
+        const resp =  prepareSuccess<${capitalName}Response>(
+          {token: "", expiresIn: 3500}
+        )
+        return Promise.resolve(resp)
       }
     
-      public create(${name}CreationParams: ${capitalName}Params): ${capitalName} {
-        return {
-          url: "url created!",
-          //...${name}CreationParams,
+      public create(${capitalName}CreationParams: any): Promise<ServiceResult<${capitalName}Response>>{
+        const resp = prepareSuccess<${capitalName}Response>({token: "", expiresIn: 3500})
+        const err = prepareError("", "")
+        return Promise.resolve(resp)
         };
       }
-    }`;
-    fs.writeFileSync(path.join(dirPath, (name +'.ts')), interfaceContent);
-    fs.writeFileSync(path.join(dirPath, (name +'Controller.ts')), controllerContent);
-    fs.writeFileSync(path.join(dirPath, (name +'Service.ts')), serviceContent);
+    `
+  const interfaceIndexContent = `
+  export * from './${capitalName}Response'
+  `
+
+    // Ensure the interfaces directory exists
+    fs.mkdirSync(`${dirPath}/interfaces`, { recursive: true });
+
+    fs.writeFileSync(path.join(`${dirPath}/interfaces`, (`${capitalName}Response` +'.ts')), interfaceContent);
+    fs.writeFileSync(path.join(`${dirPath}/interfaces`, ('index' +'.ts')), interfaceIndexContent);
+    fs.writeFileSync(path.join(dirPath, (name +'Controller.ts')), controllerContent2);
+    fs.writeFileSync(path.join(dirPath, (name +'Service.ts')), serviceContent2);
 
     console.log(`Directory and files created at ${dirPath}`);
 };

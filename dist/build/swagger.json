@@ -6,32 +6,51 @@
         "requestBodies": {},
         "responses": {},
         "schemas": {
-            "Testapi": {
+            "TestapiResponse": {
                 "properties": {
-                    "url": {
+                    "token": {
                         "type": "string"
+                    },
+                    "expiresIn": {
+                        "type": "number",
+                        "format": "double"
                     }
                 },
                 "required": [
-                    "url"
+                    "token",
+                    "expiresIn"
                 ],
                 "type": "object",
                 "additionalProperties": false
             },
-            "Pick_Testapi.url_": {
+            "MsException": {
                 "properties": {
-                    "url": {
+                    "code": {
                         "type": "string"
-                    }
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "details": {}
                 },
                 "required": [
-                    "url"
+                    "code",
+                    "message"
                 ],
                 "type": "object",
-                "description": "From T, pick a set of properties whose keys are in the union K"
+                "additionalProperties": false
             },
-            "TestapiParams": {
-                "$ref": "#/components/schemas/Pick_Testapi.url_"
+            "ServiceResult_TestapiResponse_": {
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/TestapiResponse"
+                    },
+                    "error": {
+                        "$ref": "#/components/schemas/MsException"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false
             }
         },
         "securitySchemes": {}
@@ -55,7 +74,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Testapi"
+                                    "$ref": "#/components/schemas/ServiceResult_TestapiResponse_"
                                 }
                             }
                         }
@@ -88,7 +107,14 @@
                 "operationId": "CreateTestapi",
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServiceResult_TestapiResponse_"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [],
@@ -98,7 +124,15 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/TestapiParams"
+                                "properties": {
+                                    "test": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "test"
+                                ],
+                                "type": "object"
                             }
                         }
                     }
